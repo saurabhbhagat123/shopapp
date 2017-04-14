@@ -33,7 +33,7 @@ public class ShopTest {
 		HttpHeaders requestHeaders = new HttpHeaders();
 		requestHeaders.setContentType(MediaType.APPLICATION_JSON);
 		HttpEntity<String> httpEntity =new HttpEntity<String>(json, requestHeaders);
-		ResponseEntity<List<Shop>> responseEntity = (ResponseEntity<List<Shop>>) restTemplate.postForEntity("http://localhost:8080/shop-app/shops", httpEntity,new ArrayList<Shop>().getClass());
+		ResponseEntity<List> responseEntity = restTemplate.postForEntity("http://localhost:8080/shop-app/shops", httpEntity,List.class);
 
 	}
 
@@ -41,7 +41,7 @@ public class ShopTest {
 	@Test
 	public void testGetNearestShop(){
 		RestTemplate restTemplate=new RestTemplate();
-		String json="{\"shops\": [{\"shopname\": \"Destination Centre\",\"address\": {\"streetname\": \"Magarpatta City,Hadapsar\",\"city\": \"Pune\",\"state\": \"Maharashtra\",\"postcode\": 411038}},{\"shopname\": \"Seasons Mall\",\"address\": {\"streetname\": \"Magarpatta City,Hadapsar\",\"city\": \"Pune\",\"state\": \"Maharashtra\",\"postcode\": 411013}}]}";
+		String json="{\"shops\": [{\"shopname\": \"Destination Centre\",\"address\": {\"streetname\": \"Magarpatta City,Hadapsar\",\"city\": \"Pune\",\"state\": \"Maharashtra\",\"postcode\": 411028}},{\"shopname\": \"Seasons Mall\",\"address\": {\"streetname\": \"Magarpatta City,Hadapsar\",\"city\": \"Pune\",\"state\": \"Maharashtra\",\"postcode\": 411013}}]}";
 		HttpHeaders requestHeaders = new HttpHeaders();
 		requestHeaders.setContentType(MediaType.APPLICATION_JSON);
 		HttpEntity<String> httpEntity =new HttpEntity<String>(json, requestHeaders);

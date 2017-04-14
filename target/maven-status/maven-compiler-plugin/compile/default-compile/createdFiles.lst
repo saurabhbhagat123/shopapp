@@ -1,9 +1,0 @@
-com\shop\response\NearestShopResponse.class
-com\shop\service\ShopService.class
-com\shop\google\api\GeoCode.class
-com\shop\domain\ShopAddress.class
-com\shop\service\ShopServiceImpl.class
-com\shop\domain\Shop.class
-com\shop\api\ShopApi.class
-com\shop\domain\Shops.class
-com\shop\MainApplication.class
