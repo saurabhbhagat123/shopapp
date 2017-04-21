@@ -1,27 +1,45 @@
-apply plugin: 'java'
-apply plugin: 'maven'
-
-group = 'com.shoputil'
-version = '0.0.1-SNAPSHOT'
-
-description = """"""
-
-sourceCompatibility = 1.5
-targetCompatibility = 1.5
-tasks.withType(JavaCompile) {
-	options.encoding = 'UTF-8'
-}
-
-
-
-repositories {
-        
-     maven { url "http://repo.maven.apache.org/maven2" }
-}
-dependencies {
-    compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version:'1.3.1.RELEASE'
-    compile group: 'com.google.code.gson', name: 'gson', version:'2.3.1'
-    compile(group: 'org.springframework.boot', name: 'spring-boot-starter-test', version:'1.3.1.RELEASE') {
-exclude(module: 'commons-logging')
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.5.2.RELEASE")
     }
 }
+
+apply plugin: 'java'
+apply plugin: 'application'
+apply plugin: 'idea'
+apply plugin: 'org.springframework.boot'
+
+jar {
+    baseName = 'shoputil'
+    version =  '0.1.0-SNAPSHOT'
+}
+
+repositories {
+    mavenCentral()
+  
+    
+}
+
+bootRepackage {
+    mainClass = 'com.shop.MainApplication'
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+dependencies {
+    compile("org.springframework.boot:spring-boot-starter-web")
+    compile("com.google.code.gson:gson:2.3.1")
+    // tag::actuator[]
+    compile("org.springframework.boot:spring-boot-starter-actuator")
+   // compile("org.springframework.boot:spring-boot-starter-test:1.4.0.RELEASE")
+    // end::actuator[]
+    // tag::tests[]
+    testCompile("junit:junit")
+    //testCompile(group: 'org.springframework.boot', name: 'spring-boot-starter-test', version:'1.9.1.RELEASE')
+    testCompile("org.springframework.boot:spring-boot-starter-test:1.4.0.RELEASE")
+}
+
