@@ -1,5 +1,6 @@
 package com.shop.service;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -8,60 +9,97 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.shop.domain.Shop;
-import com.shop.google.api.GeoCode;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.shop.dao.ShopRepository;
+import com.shop.domain.Shop;
+import com.shop.domain.ShopResponse;
+import com.shop.domain.ShopVersion;
+import com.shop.exception.InvalidAddressException;
+import com.shop.exception.NoShopsAvailableException;
+import com.shop.google.api.GeoCodeAPI;
 
 @Service
-public class ShopServiceImpl implements ShopService{
+public class ShopServiceImpl implements ShopService {
 
-
-
-	private static Map<String,Shop> shopData=new HashMap<String,Shop>();
 
 	@Autowired
-	private GeoCode geoCode;
+	private ShopRepository shopRepository;
 
-	public List<Shop> addShops(List<Shop> shops){
+	private static final Logger logger = LoggerFactory
+			.getLogger(ShopServiceImpl.class);
 
-		List<Shop> responses=new ArrayList<Shop>();
-		Shop response=null;
-		for(Shop shop:shops){
+	@Autowired
+	private GeoCodeAPI geoCodeAPI;
+
+	public ShopResponse addShops(List<Shop> shops) throws IOException,
+			 Exception {
+
+		logger.debug("ShopServiceImpl.addShops()   ");
+		ShopResponse shopResponse = new ShopResponse();
+
+		List<ShopVersion> shopVersionList = new ArrayList<ShopVersion>();
+
+		Shop response = null;
+		for (Shop shop : shops) {
+			ShopVersion shopVersion = new ShopVersion();
+
+			boolean foundShop = false;
 			calculateAndSetLatLong(shop);
-			synchronized(this){
-				response=shopData.put(shop.getShopname(), shop);
-			}
-			if(null!=response){
-				responses.add(response);	
+			synchronized (this) {
+
+				Shop shopInDB = shopRepository.findByShopname(shop
+						.getShopname());
+				
+				
+				if (shopInDB != null) {
+					Shop previousVersionShop=shopInDB.clone();
+					shopVersion.setPreviousVersion(previousVersionShop);
+					shopVersion.setCurrentVersion(shop);
+					shopVersion.setMessage("Shops Replaced..");
+					logger.info("Shops Replaced");
+					logger.info("Previous Version="+previousVersionShop);
+					logger.info("Current Version="+shop);
+				} else {
+					shopVersion.setCurrentVersion(shop);
+					shopVersion.setMessage("Shops Added Successfully..");
+					logger.info("Shops Added Successfully.. ");
+				}
+				shopRepository.save(shop);
 			}
 
+			shopVersionList.add(shopVersion);
 		}
-
-		return responses;
-
+		shopResponse.setShopsVersion(shopVersionList);
+		return shopResponse;
 
 	}
 
+	public Shop getNearestShop(String lat, String lng) {
 
-	public Shop getNearestShop(String lat,String lng){
+		logger.debug("ShopServiceImpl.getNearestShop()   ");
+		double lattitude = Double.parseDouble(lat);
+		double longitude = Double.parseDouble(lng);
 
-		double lattitude=Double.parseDouble(lat);
-		double longitude=Double.parseDouble(lng);
-		Set<Entry<String, Shop>> entrySet = shopData.entrySet();
-		Iterator<Entry<String, Shop>> iterator = entrySet.iterator();
-		double shortestDistance=-1;
-		double distance=0;
-		Shop nearestShop=null;
-		while(iterator.hasNext()){
-			Entry<String, Shop> entry = iterator.next();
-			Shop shop=entry.getValue();
-			distance=geoCode.distanceTo(lattitude, longitude, shop);
+		List<Shop> shops = shopRepository.findAll();
+		if (null == shops || shops.isEmpty())
+			throw new NoShopsAvailableException("No Shops are present..");
 
-			if(shortestDistance==-1||distance<=shortestDistance){
-				shortestDistance=distance;
-				nearestShop=shop;
+		Iterator<Shop> iterator = shops.iterator();
+		double shortestDistance = -1;
+		double distance = 0;
+		Shop nearestShop = null;
+		while (iterator.hasNext()) {
+			Shop shop = iterator.next();
+			distance = geoCodeAPI.distanceTo(lattitude, longitude, shop);
+
+			if (shortestDistance == -1 || distance <= shortestDistance) {
+				shortestDistance = distance;
+				nearestShop = shop;
 			}
 
 		}
@@ -69,14 +107,14 @@ public class ShopServiceImpl implements ShopService{
 		return nearestShop;
 	}
 
+	public void calculateAndSetLatLong(Shop shop) throws IOException, Exception {
 
-	public void calculateAndSetLatLong(Shop shop){
-		
-		String latLong=geoCode.getLattLongByAddress(shop.getAddress().toString());
-		String lat=latLong.split(":")[0];
-		String lng=latLong.split(":")[1];
+		String latLong = geoCodeAPI.getLattLongByAddress(shop.getAddress()
+				.toString());
+		String lat = latLong.split(":")[0];
+		String lng = latLong.split(":")[1];
 		shop.setLattitude(Double.parseDouble(lat));
 		shop.setLongitude(Double.parseDouble(lng));
-		
+
 	}
 }

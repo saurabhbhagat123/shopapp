@@ -18,6 +18,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.shop.MainApplication;
 import com.shop.domain.Shop;
+import com.shop.domain.ShopResponse;
 import com.shop.response.NearestShopResponse;
 
 @RunWith(SpringRunner.class)
@@ -46,7 +47,7 @@ public class ShopTest {
 		HttpHeaders requestHeaders = new HttpHeaders();
 		requestHeaders.setContentType(MediaType.APPLICATION_JSON);
 		HttpEntity<String> httpEntity =new HttpEntity<String>(json, requestHeaders);
-		restTemplate.postForEntity("/shops", httpEntity,new ArrayList<Shop>().getClass());
+		restTemplate.postForEntity("/shops", httpEntity,ShopResponse.class);
 		ResponseEntity<NearestShopResponse> responseEntity = restTemplate.getForEntity("/shop?lat=18.526792&long=73.9071402", NearestShopResponse.class);
 		NearestShopResponse nearestShop=responseEntity.getBody();
 		Assert.assertEquals("Destination Centre", nearestShop.getNearestShop());

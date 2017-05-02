@@ -1,18 +1,52 @@
 package com.shop.domain;
 
+import javax.annotation.Generated;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+@Entity
+@Table(name="address")
 public class ShopAddress {
 
+	
+	@Id
+	@GeneratedValue(strategy=GenerationType.AUTO)
+	@JsonIgnore
+	int addressId;
+	
+	@Column
 	String number="";
 
+	@Column
 	String streetname="";
 
+	@Column
 	String city="";
 
+	@Column
 	String state="";
 
+	@Column
 	String postcode="";
 
+	@Column
 	String country="";
+	
+	
+	public int getAddressId() {
+		return addressId;
+	}
+
+	public void setAddressId(int addressId) {
+		this.addressId = addressId;
+	}
+
 
 	public String getStreetname() {
 		return streetname;
